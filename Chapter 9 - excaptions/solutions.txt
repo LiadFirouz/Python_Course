@@ -1,0 +1,7 @@
+49 + 2 = 51
+49-8 - can't solve, it's need to be a math exercise
+sf +5 - can't solve, it's need to be a math exercise
+sdf * 8 - can't solve, it's need to be a math exercise
+dsf sdf sf - can't solve, it's need to be a math exercise
+15 * 3 = 45
+8 / 0 = None
