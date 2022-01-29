@@ -11,7 +11,7 @@ MAX_VELOCITY = 30
 WINDOW_WIDTH = 500
 WINDOW_HEIGHT = 500
 NUMBER_OF_LINES = 10
-BACKGROUND_IMAGE = r'C:\Users\liadf\OneDrive\PythonNetwork\Python\Chapter 11 - Advance OOP\sky.jpg'
+BACKGROUND_IMAGE = r'C:\Users\LiadF\PycharmProjects\python_course\Chapter 11 - Advance OOP\planne.png'
 
 LEFT_CLICK = 1
 BLACK = (0, 0, 0)

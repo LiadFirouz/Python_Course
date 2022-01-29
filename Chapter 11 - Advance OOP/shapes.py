@@ -4,7 +4,7 @@ PINK = (255, 20, 147)
 WHITE = (255, 255, 255)
 
 MOVING_IMAGE = r'star.jpg'
-PLANE_IMAGE = r'C:\Users\liadf\OneDrive\PythonNetwork\Python\Chapter 11 - Advance OOP\planne.png'
+PLANE_IMAGE = r'C:\Users\LiadF\PycharmProjects\python_course\Chapter 11 - Advance OOP\planne.png'
 HORIZONTAL_VELOCITY = 3
 VERTICAL_VELOCITY = 5
 
