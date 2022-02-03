@@ -4,29 +4,26 @@
 
 import pygame
 import random
+import os
+import sys
 from shapes import Plane
 
-REFRESH_RATE = 25
-MAX_VELOCITY = 30
+# window set-up
 WINDOW_WIDTH = 500
 WINDOW_HEIGHT = 500
 NUMBER_OF_LINES = 10
-BACKGROUND_IMAGE = r'C:\Users\LiadF\PycharmProjects\python_course\Chapter 11 - Advance OOP\planne.png'
+BACKGROUND_IMAGE = r'{}\sky.jpg'.format(os.getcwd())
+
+PLANE_SIZE = 30
+NUMBER_OF_PLANES = 1
+VX_DISTANCE = WINDOW_WIDTH / NUMBER_OF_LINES
+VY_DISTANCE = WINDOW_HEIGHT / NUMBER_OF_LINES
+
+REFRESH_RATE = 25
+MAX_VELOCITY = 30
 
 LEFT_CLICK = 1
 BLACK = (0, 0, 0)
-
-PLANE_SIZE = 30
-NUMBER_OF_PLANES = 4
-
-# game first setup
-pygame.init()
-size = (WINDOW_WIDTH, WINDOW_HEIGHT)
-screen = pygame.display.set_mode(size)
-background_image = pygame.image.load(BACKGROUND_IMAGE)
-pygame.display.set_caption("Air Traffic Control - score: {}".format(0))
-screen.blit(background_image, (0, 0))
-clock = pygame.time.Clock()
 
 
 def set_matrix_on_screen(screen):
@@ -36,7 +33,7 @@ def set_matrix_on_screen(screen):
     x_line_distance = WINDOW_WIDTH / NUMBER_OF_LINES
     y_line_distance = WINDOW_HEIGHT / NUMBER_OF_LINES
 
-    # lines setup start and end set_cellss
+    # lines setup start and end set_cells
     start_pos_width = [0, 0]
     end_pos_width = [0, WINDOW_HEIGHT]
     start_pos_height = [0, 0]
@@ -72,11 +69,6 @@ def set_cells(x_distance, y_distance):
     return cells_list
 
 
-cells_list = set_cells(WINDOW_WIDTH / NUMBER_OF_LINES, WINDOW_HEIGHT / NUMBER_OF_LINES)
-planes_list = pygame.sprite.Group()
-new_planes_list = pygame.sprite.Group()
-
-
 def is_cell_taken(cell):
     """ Checks if the cell that was drawn is already taken,
         if its taken drawn a new cell, else return the cell
@@ -93,59 +85,41 @@ def is_cell_taken(cell):
 def set_planes_positions(plane, cell):
     """ the function will receive a plane and create a new location for it
         Args: plane - Plane.shapes
-              cell - list[integer, integer]"""
-    plane.update_v(cell[0] - PLANE_SIZE, cell[1] - PLANE_SIZE)
-    print(cell[0] - PLANE_SIZE, cell[1] - PLANE_SIZE)
+        cell - list[integer, integer]"""
+    plane.update_v(cell[0], cell[1])
     plane.update_loc()
     planes_list.add(plane)
 
 
-# create planes
-for i in range(NUMBER_OF_PLANES):
-    plane = Plane(0, 0)
-    cell = is_cell_taken(random.choice(cells_list))
-    set_planes_positions(plane, cell)
-planes_list.draw(screen)
+def choose_plane(plane_number, plane_list):
+    for plane in enumerate(plane_list):
+        if plane[0] == plane_number:
+            return plane[1]
 
 
-def there_is_any_collisions():
-    """ Check if there is any collisions between the planes
-        Returns: True / False """
-
-    new_planes_list.empty()
-    for plane in planes_list:
-        planes_hit_list = pygame.sprite.spritecollide \
-            (plane, planes_list, False)
-        if not len(planes_hit_list) == 1:
-            return False
-    return True
-
-
-def possible_pos(plane):
+def plane_next_optinal_cells(plane):
     """ making a new list with all the options to move
         Args: plane - Plane.shapes
         Return: possible_pos - list[integer, integer]"""
 
-    x_line_distance = WINDOW_WIDTH / NUMBER_OF_LINES
-    y_line_distance = WINDOW_HEIGHT / NUMBER_OF_LINES
-    x, y = plane.get_pos()
-    x = x + PLANE_SIZE
-    y = y + PLANE_SIZE
+    # x_line_distance = WINDOW_WIDTH / NUMBER_OF_LINES
+    # y_line_distance = WINDOW_HEIGHT / NUMBER_OF_LINES
+    current_x, current_y = plane.get_pos()
 
-    possible_pos = []
+    optinal_cells = []
 
     for cell in cells_list:
-        if (cell[0] == x + x_line_distance or cell[0] == x - x_line_distance) \
-                and cell[1] == y:
-            possible_pos.append(cell)
-        elif (cell[0] == x + x_line_distance or cell[0] == x - x_line_distance) \
-                and cell[1] == y - y_line_distance:
-            possible_pos.append(cell)
-        elif (cell[0] == x + x_line_distance or cell[0] == x - x_line_distance) \
-                and cell[1] == y + y_line_distance:
-            possible_pos.append(cell)
+        if (cell[0] == current_x + VX_DISTANCE or cell[0] == current_x - VX_DISTANCE) \
+                and cell[1] == current_y:
+            optinal_cells.append(cell)
+        elif (cell[0] == current_x + VX_DISTANCE or cell[0] == current_x - VX_DISTANCE \
+              or cell[0] == current_x) and cell[1] == current_y - VY_DISTANCE:
+            optinal_cells.append(cell)
+        elif (cell[0] == current_x + VX_DISTANCE or cell[0] == current_x - VX_DISTANCE \
+              or cell[0] == current_x) and cell[1] == current_y + VY_DISTANCE:
+            optinal_cells.append(cell)
 
-    return possible_pos
+    return optinal_cells
 
 
 def update_plane_number(plane_number):
@@ -159,10 +133,26 @@ def update_plane_number(plane_number):
     return plane_number
 
 
-def choose_plane(plane_number, plane_list):
-    for plane in enumerate(plane_list):
-        if plane[0] == plane_number:
-            return plane[1]
+# game initialize
+pygame.init()
+size = (WINDOW_WIDTH, WINDOW_HEIGHT)
+screen = pygame.display.set_mode(size)
+background_image = pygame.image.load(BACKGROUND_IMAGE)
+pygame.display.set_caption("Air Traffic Control - score: {}".format(0))
+screen.blit(background_image, (0, 0))
+clock = pygame.time.Clock()
+
+# create board
+cells_list = set_cells(WINDOW_WIDTH / NUMBER_OF_LINES, WINDOW_HEIGHT / NUMBER_OF_LINES)
+planes_list = pygame.sprite.Group()
+new_planes_list = pygame.sprite.Group()
+
+# create planes
+for i in range(NUMBER_OF_PLANES):
+    plane = Plane(0, 0)
+    cell = is_cell_taken(random.choice(cells_list))
+    set_planes_positions(plane, cell)
+planes_list.draw(screen)
 
 
 def main():
@@ -176,22 +166,36 @@ def main():
                 finish = True
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == LEFT_CLICK:
                 x, y = pygame.mouse.get_pos()
-                print(x, y)
 
-        while True: # there_is_any_collisions():
+        while score < 3000:  # there_is_any_collisions():
+
+            # reaction for the x button
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
 
             plane = choose_plane(plane_number, planes_list)
-            print('lll' ,len(possible_pos(plane)))
-            cell = (random.choice(possible_pos(plane)))
-            set_planes_positions(plane, cell)
-            update_plane_number(plane_number)
-            print('good')
-            # update screen
+            print('Plane {}:'. format(plane_number), plane.get_pos())
+            try:
+                next_cell = random.choice(plane_next_optinal_cells(plane))
+                print("options: {}".format(plane_next_optinal_cells(plane), '\n'))
+                score += 200
+            except Exception as e:  # if their error which error print...
+                print("Error: {} {}".format(e, next_cell))
+
+            current_x, current_y = plane.get_pos()
+            set_planes_positions(plane, [next_cell[0] - current_x, next_cell[1] - current_y])
+            print([next_cell[0] - current_x, next_cell[1] - current_y], '\n')
+            plane_number = update_plane_number(plane_number)
+
+            # update changes on screen
             screen.blit(background_image, (0, 0))
+            pygame.display.set_caption("Air Traffic Control - score: {}".format(score))
             set_matrix_on_screen(screen)
             planes_list.draw(screen)
+            clock.tick(REFRESH_RATE * 100)
             pygame.display.flip()
-            clock.tick(REFRESH_RATE)
+            clock.tick(REFRESH_RATE * 0.1)
 
     pygame.quit()
 
