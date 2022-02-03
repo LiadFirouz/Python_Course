@@ -6,6 +6,8 @@ import pygame
 import random
 import os
 import sys
+from tkinter import *
+from tkinter import messagebox
 from shapes import Plane
 
 # window set-up
@@ -15,7 +17,7 @@ NUMBER_OF_LINES = 10
 BACKGROUND_IMAGE = r'{}\sky.jpg'.format(os.getcwd())
 
 PLANE_SIZE = 30
-NUMBER_OF_PLANES = 1
+NUMBER_OF_PLANES = 4
 VX_DISTANCE = WINDOW_WIDTH / NUMBER_OF_LINES
 VY_DISTANCE = WINDOW_HEIGHT / NUMBER_OF_LINES
 
@@ -77,7 +79,7 @@ def is_cell_taken(cell):
 
     for plane in planes_list:
         x, y = plane.get_pos()
-        if x == cell[0] - PLANE_SIZE and y == cell[1] - PLANE_SIZE:
+        if x == cell[0] and y == cell[1]:
             return is_cell_taken(random.choice(cells_list))
     return cell
 
@@ -97,7 +99,7 @@ def choose_plane(plane_number, plane_list):
             return plane[1]
 
 
-def plane_next_optinal_cells(plane):
+def plane_next_optinal_cells(plane, planes_positions):
     """ making a new list with all the options to move
         Args: plane - Plane.shapes
         Return: possible_pos - list[integer, integer]"""
@@ -119,6 +121,11 @@ def plane_next_optinal_cells(plane):
               or cell[0] == current_x) and cell[1] == current_y + VY_DISTANCE:
             optinal_cells.append(cell)
 
+    for position in planes_positions:
+        for cell in optinal_cells:
+            if cell == position:
+                optinal_cells.remove(cell)
+
     return optinal_cells
 
 
@@ -133,6 +140,17 @@ def update_plane_number(plane_number):
     return plane_number
 
 
+def collisions(planes_positions):
+
+    for p in planes_positions:
+        more_then_one = 0
+        for p1 in planes_positions:
+            if p == p1:
+                more_then_one += 1
+            if more_then_one > 1:
+                return True
+    return False
+
 # game initialize
 pygame.init()
 size = (WINDOW_WIDTH, WINDOW_HEIGHT)
@@ -145,13 +163,14 @@ clock = pygame.time.Clock()
 # create board
 cells_list = set_cells(WINDOW_WIDTH / NUMBER_OF_LINES, WINDOW_HEIGHT / NUMBER_OF_LINES)
 planes_list = pygame.sprite.Group()
-new_planes_list = pygame.sprite.Group()
+planes_positions = []
 
 # create planes
 for i in range(NUMBER_OF_PLANES):
     plane = Plane(0, 0)
     cell = is_cell_taken(random.choice(cells_list))
     set_planes_positions(plane, cell)
+    planes_positions.append(plane.get_pos())
 planes_list.draw(screen)
 
 
@@ -159,44 +178,40 @@ def main():
     score = 0
     plane_number = 0
 
-    finish = False
-    while not finish:
+    while score < 3800 and not collisions(planes_positions):  # collisions():
+
+        # reaction for the x button
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                finish = True
-            elif event.type == pygame.MOUSEBUTTONDOWN and event.button == LEFT_CLICK:
-                x, y = pygame.mouse.get_pos()
+                sys.exit()
 
-        while score < 3000:  # there_is_any_collisions():
+        plane = choose_plane(plane_number, planes_list)
+        try:
+            next_cell = random.choice(plane_next_optinal_cells(plane, planes_positions))
+            score += 200
+        except Exception as e:  # if their error which error print...
+            print("Error: {}".format(e))
 
-            # reaction for the x button
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    sys.exit()
+        current_x, current_y = plane.get_pos()
+        set_planes_positions(plane, [next_cell[0] - current_x, next_cell[1] - current_y])
+        planes_positions[plane_number] = plane.get_pos()
+        print([next_cell[0] - current_x, next_cell[1] - current_y], '\n')
+        plane_number = update_plane_number(plane_number)
 
-            plane = choose_plane(plane_number, planes_list)
-            print('Plane {}:'. format(plane_number), plane.get_pos())
-            try:
-                next_cell = random.choice(plane_next_optinal_cells(plane))
-                print("options: {}".format(plane_next_optinal_cells(plane), '\n'))
-                score += 200
-            except Exception as e:  # if their error which error print...
-                print("Error: {} {}".format(e, next_cell))
+        # update changes on screen
+        screen.blit(background_image, (0, 0))
+        pygame.display.set_caption("Air Traffic Control - score: {}".format(score))
+        set_matrix_on_screen(screen)
+        planes_list.draw(screen)
+        clock.tick(REFRESH_RATE * 100)
+        pygame.display.flip()
+        clock.tick(REFRESH_RATE * 0.1)
 
-            current_x, current_y = plane.get_pos()
-            set_planes_positions(plane, [next_cell[0] - current_x, next_cell[1] - current_y])
-            print([next_cell[0] - current_x, next_cell[1] - current_y], '\n')
-            plane_number = update_plane_number(plane_number)
-
-            # update changes on screen
-            screen.blit(background_image, (0, 0))
-            pygame.display.set_caption("Air Traffic Control - score: {}".format(score))
-            set_matrix_on_screen(screen)
-            planes_list.draw(screen)
-            clock.tick(REFRESH_RATE * 100)
-            pygame.display.flip()
-            clock.tick(REFRESH_RATE * 0.1)
-
+    Tk().wm_withdraw()  # to hide the main window
+    if not(score < 3800 and not collisions(planes_positions)):
+        messagebox.showinfo('You Won', 'Yes!')
+    else:
+        messagebox.showinfo('Game End', 'OK')
     pygame.quit()
 
 
