@@ -41,7 +41,7 @@ while not finish:
 
         # update balls locations, bounce from edges
         for ball in balls_list:
-            ball.update_loc()
+
             x, y = ball.get_pos()
             vx, vy = ball.get_v()
             if x + BALL_SIZE > WINDOW_WIDTH or x < 0:
@@ -49,7 +49,7 @@ while not finish:
             if y + BALL_SIZE > WINDOW_HEIGHT or y < 0:
                 vy *= -1
             ball.update_v(vx, vy)
-
+            ball.update_loc()
         # find which balls collide and should be removed
         new_balls_list.empty()
         for ball in balls_list:
