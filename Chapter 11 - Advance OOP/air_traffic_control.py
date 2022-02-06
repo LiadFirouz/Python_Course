@@ -203,7 +203,7 @@ def main():
 
         # update changes on screen
         screen.blit(background_image, (0, 0))
-        pygame.display.set_caption("Air Traffic Control - tour: {}".format(t))
+        pygame.display.set_caption("Air Traffic Control - tour: {}".format(ticks))
         set_matrix_on_screen(screen)
         planes_list.draw(screen)
         clock.tick(REFRESH_RATE * 100)
