@@ -1,1 +1,0 @@
-cd /mnt/c/Users/LiadF/PycharmProjects/python_course2.0/Python_Course
