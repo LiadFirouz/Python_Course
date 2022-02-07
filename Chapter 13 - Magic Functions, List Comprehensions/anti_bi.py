@@ -1,7 +1,5 @@
 def anti_bi(s):
-    """The function returns the average difference between list1 and list2
-        Args: list1, list2 - list
-        Returns: int"""
+
     return s.replace('b', '')
 
 
